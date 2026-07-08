@@ -286,3 +286,45 @@ class RootCommand(Feature):
                 users_list.append(f"Unknown User ({uid})")
         
         await ctx.send("Permitted users:\n" + "\n".join(users_list))
+
+    @Feature.Command(parent="jsk", name="guilds", aliases=["servers"])
+    async def jsk_guilds(self, ctx: ContextA):
+        """
+        Lists all the guilds (servers) the bot is currently in.
+        """
+        if not self.bot.guilds:
+            return await ctx.send("The bot is not in any servers.")
+        
+        paginator = commands.Paginator(prefix="```", suffix="```", max_size=1980)
+        for guild in self.bot.guilds:
+            paginator.add_line(f"{guild.name} ({guild.id}) - {guild.member_count} members")
+            
+        interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
+        await interface.send_to(ctx)
+
+    @Feature.Command(parent="jsk", name="leave")
+    async def jsk_leave(self, ctx: ContextA, guild_id: int):
+        """
+        Causes the bot to leave a specific guild.
+        """
+        guild = self.bot.get_guild(guild_id)
+        if not guild:
+            return await ctx.send(f"Could not find guild with ID {guild_id}")
+            
+        try:
+            await guild.leave()
+            await ctx.send(f"Successfully left guild: {guild.name} ({guild_id})")
+        except discord.HTTPException as e:
+            await ctx.send(f"Failed to leave guild: {e}")
+
+    @Feature.Command(parent="jsk", name="invite")
+    async def jsk_invite(self, ctx: ContextA):
+        """
+        Generates an invite link for the bot.
+        """
+        permissions = discord.Permissions(8)  # Administrator
+        try:
+            invite_url = discord.utils.oauth_url(self.bot.user.id, permissions=permissions)
+            await ctx.send(f"Invite link (with Admin permissions):\n<{invite_url}>")
+        except Exception as e:
+            await ctx.send(f"Failed to generate invite URL: {e}")

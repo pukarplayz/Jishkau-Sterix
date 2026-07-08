@@ -38,7 +38,7 @@ class JishakuCloseView(discord.ui.View):
         self.cog = cog
         self.ctx = ctx
 
-    @discord.ui.button(label="Dismiss", style=discord.ButtonStyle.danger, emoji="🗑️")
+    @discord.ui.button(label="Dismiss", style=discord.ButtonStyle.danger)
     async def dismiss(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not await self.check_permissions(interaction):
             return
@@ -48,7 +48,7 @@ class JishakuCloseView(discord.ui.View):
         except discord.HTTPException:
             pass
 
-    @discord.ui.button(label="Rerun", style=discord.ButtonStyle.success, emoji="🔄")
+    @discord.ui.button(label="Rerun", style=discord.ButtonStyle.primary)
     async def rerun_command(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not await self.check_permissions(interaction):
             return
@@ -62,7 +62,7 @@ class JishakuCloseView(discord.ui.View):
 
         await self.ctx.reinvoke()
 
-    @discord.ui.button(label="Cancel Task", style=discord.ButtonStyle.secondary, emoji="⏹️")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.secondary)
     async def cancel_task(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not await self.check_permissions(interaction):
             return
