@@ -1,0 +1,14 @@
+{
+    "[python]": {
+        "editor.formatOnType": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "python.analysis.typeCheckingMode": "strict",
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "esbonio.server.enabled": true,
+    "esbonio.sphinx.confDir": ""
+}
