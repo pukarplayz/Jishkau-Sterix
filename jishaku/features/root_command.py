@@ -161,12 +161,7 @@ class RootCommand(Feature):
         # Show websocket latency in milliseconds
         summary.append(f"Average websocket latency: {round(self.bot.latency * 1000, 2)}ms")
 
-        layout = discord.ui.LayoutView(timeout=None)
-        container = discord.ui.Container(accent_color=5793266)
-        container.add_item(discord.ui.TextDisplay("\n".join(summary)))
-        layout.add_item(container)
-
-        await ctx.send(view=layout)
+        await ctx.send("\n".join(summary))
 
     # pylint: disable=no-member
     @Feature.Command(parent="jsk", name="hide")
