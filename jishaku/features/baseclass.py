@@ -28,18 +28,39 @@ from jishaku.types import BotT, ContextA
 __all__ = (
     'Feature',
     'CommandTask',
-    'JishakuCloseView'
+    'JishakuComponentV2'
 )
 
 
-class JishakuCloseView(discord.ui.View):
-    def __init__(self, cog: 'Feature', ctx: ContextA, timeout: float = 600.0):
+class JishakuComponentV2(discord.ui.LayoutView):
+    def __init__(self, cog: 'Feature', ctx: ContextA, content: str, timeout: float = 600.0):
         super().__init__(timeout=timeout)
         self.cog = cog
         self.ctx = ctx
 
-    @discord.ui.button(label="Dismiss", style=discord.ButtonStyle.danger)
-    async def dismiss(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if content:
+            container = discord.ui.Container(accent_color=5793266)
+            container.add_item(discord.ui.TextDisplay(content))
+            self.add_item(container)
+
+        button_section = discord.ui.Section()
+
+        btn_dismiss = discord.ui.Button(label="Dismiss", style=discord.ButtonStyle.danger)
+        btn_dismiss.callback = self.dismiss
+
+        btn_rerun = discord.ui.Button(label="Rerun", style=discord.ButtonStyle.primary)
+        btn_rerun.callback = self.rerun_command
+
+        btn_cancel = discord.ui.Button(label="Cancel", style=discord.ButtonStyle.secondary)
+        btn_cancel.callback = self.cancel_task
+
+        button_section.add_item(btn_dismiss)
+        button_section.add_item(btn_rerun)
+        button_section.add_item(btn_cancel)
+
+        self.add_item(button_section)
+
+    async def dismiss(self, interaction: discord.Interaction):
         if not await self.check_permissions(interaction):
             return
 
@@ -48,8 +69,7 @@ class JishakuCloseView(discord.ui.View):
         except discord.HTTPException:
             pass
 
-    @discord.ui.button(label="Rerun", style=discord.ButtonStyle.primary)
-    async def rerun_command(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def rerun_command(self, interaction: discord.Interaction):
         if not await self.check_permissions(interaction):
             return
 
@@ -62,8 +82,7 @@ class JishakuCloseView(discord.ui.View):
 
         await self.ctx.reinvoke()
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.secondary)
-    async def cancel_task(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def cancel_task(self, interaction: discord.Interaction):
         if not await self.check_permissions(interaction):
             return
 
@@ -296,9 +315,18 @@ class Feature(commands.Cog):
         original_send = ctx.send
 
         async def custom_send(*args: typing.Any, **kwargs: typing.Any):
-            # Attach JishakuCloseView only if no other view is supplied
-            if "view" not in kwargs:
-                kwargs["view"] = JishakuCloseView(self, ctx)
+            content = kwargs.pop("content", None)
+            if not content and args:
+                content = args[0]
+                args = args[1:]
+            else:
+                content = ""
+
+            if not kwargs.get("view"):
+                kwargs["view"] = JishakuComponentV2(self, ctx, str(content))
+            elif content:
+                kwargs["content"] = content
+
             return await original_send(*args, **kwargs)
 
         ctx.send = custom_send
