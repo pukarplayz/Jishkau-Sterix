@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 jishaku.features.baseclass
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -29,17 +30,15 @@ class JishakuComponentV2(discord.ui.LayoutView):
             container = discord.ui.Container(accent_color=5793266)
             container.add_item(discord.ui.TextDisplay(content))
             self.add_item(container)
-        button_section = discord.ui.Section(accessory=None)
         btn_dismiss = discord.ui.Button(label="Dismiss", style=discord.ButtonStyle.danger)
         btn_dismiss.callback = self.dismiss
         btn_rerun = discord.ui.Button(label="Rerun", style=discord.ButtonStyle.primary)
         btn_rerun.callback = self.rerun_command
         btn_cancel = discord.ui.Button(label="Cancel", style=discord.ButtonStyle.secondary)
         btn_cancel.callback = self.cancel_task
-        button_section.add_item(btn_dismiss)
-        button_section.add_item(btn_rerun)
-        button_section.add_item(btn_cancel)
-        self.add_item(button_section)
+        self.add_item(btn_dismiss)
+        self.add_item(btn_rerun)
+        self.add_item(btn_cancel)
     async def dismiss(self, interaction: discord.Interaction):
         if not await self.check_permissions(interaction):
             return
