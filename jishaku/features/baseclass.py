@@ -42,20 +42,30 @@ class JishakuComponentV2(discord.ui.LayoutView):
         if content:
             container.add_item(discord.ui.TextDisplay(content))
 
+        # Determine which buttons are necessary based on the command name
+        cmd_name = ctx.command.name if ctx.command else ""
+        show_rerun = cmd_name in ("py", "python", "sh", "shell", "sql", "git", "calc")
+        show_cancel = cmd_name in ("py", "python", "sh", "shell", "sql", "git")
+
+        # Only add a separator if there is visible content above
+        if content:
+            container.add_item(discord.ui.Separator())
+
         action_row = discord.ui.ActionRow()
 
         btn_dismiss = discord.ui.Button(label="Dismiss", style=discord.ButtonStyle.danger)
         btn_dismiss.callback = self.dismiss
-
-        btn_rerun = discord.ui.Button(label="Rerun", style=discord.ButtonStyle.primary)
-        btn_rerun.callback = self.rerun_command
-
-        btn_cancel = discord.ui.Button(label="Cancel", style=discord.ButtonStyle.secondary)
-        btn_cancel.callback = self.cancel_task
-
         action_row.add_item(btn_dismiss)
-        action_row.add_item(btn_rerun)
-        action_row.add_item(btn_cancel)
+
+        if show_rerun:
+            btn_rerun = discord.ui.Button(label="Rerun", style=discord.ButtonStyle.primary)
+            btn_rerun.callback = self.rerun_command
+            action_row.add_item(btn_rerun)
+
+        if show_cancel:
+            btn_cancel = discord.ui.Button(label="Cancel", style=discord.ButtonStyle.secondary)
+            btn_cancel.callback = self.cancel_task
+            action_row.add_item(btn_cancel)
 
         container.add_item(action_row)
         self.add_item(container)
@@ -327,20 +337,7 @@ class Feature(commands.Cog):
             elif content:
                 kwargs["content"] = content
 
-            msg = await original_send(*args, **kwargs)
-            if msg:
-                original_edit = msg.edit
-                async def custom_edit(*e_args: typing.Any, **e_kwargs: typing.Any):
-                    e_content = e_kwargs.pop("content", None)
-                    if not e_content and e_args:
-                        e_content = e_args[0]
-                        e_args = e_args[1:]
-                    
-                    if e_content:
-                        e_kwargs["view"] = JishakuComponentV2(self, ctx, str(e_content))
-                    return await original_edit(*e_args, **e_kwargs)
-                msg.edit = custom_edit
-            return msg
+            return await original_send(*args, **kwargs)
 
         ctx.send = custom_send
 
